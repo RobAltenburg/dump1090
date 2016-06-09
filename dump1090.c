@@ -45,6 +45,7 @@
 #include <sys/select.h>
 #include "rtl-sdr.h"
 #include "anet.h"
+#include "database.h"
 
 #define MODES_DEFAULT_RATE         2000000
 #define MODES_DEFAULT_FREQ         1090000000
@@ -2476,6 +2477,10 @@ void backgroundTasks(void) {
 
 int main(int argc, char **argv) {
     int j;
+
+    /*SHORT CIRCUIT *** TEST */
+    testdb();
+    exit(0);
 
     /* Set sane defaults. */
     modesInitConfig();
