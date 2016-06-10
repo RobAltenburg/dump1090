@@ -46,6 +46,7 @@
 #include "rtl-sdr.h"
 #include "anet.h"
 #include "database.h"
+#include "dump1090.h"
 
 #define MODES_DEFAULT_RATE         2000000
 #define MODES_DEFAULT_FREQ         1090000000
@@ -100,27 +101,6 @@ struct client {
     int service;    /* TCP port the client is connected to. */
     char buf[MODES_CLIENT_BUF_SIZE+1];    /* Read buffer. */
     int buflen;                         /* Amount of data on buffer. */
-};
-
-/* Structure used to describe an aircraft in iteractive mode. */
-struct aircraft {
-    uint32_t addr;      /* ICAO address */
-    char hexaddr[7];    /* Printable ICAO address */
-    char flight[9];     /* Flight number */
-    int altitude;       /* Altitude */
-    int speed;          /* Velocity computed from EW and NS components. */
-    int track;          /* Angle of flight. */
-    time_t seen;        /* Time at which the last packet was received. */
-    long messages;      /* Number of Mode S messages received. */
-    /* Encoded latitude and longitude as extracted by odd and even
-     * CPR encoded messages. */
-    int odd_cprlat;
-    int odd_cprlon;
-    int even_cprlat;
-    int even_cprlon;
-    double lat, lon;    /* Coordinated obtained from CPR encoded data. */
-    long long odd_cprtime, even_cprtime;
-    struct aircraft *next; /* Next aircraft in our linked list. */
 };
 
 /* Program global state. */
@@ -1782,7 +1762,7 @@ struct aircraft *interactiveReceiveData(struct modesMessage *mm) {
             }
             /* If the two data is less than 10 seconds apart, compute
              * the position. */
-            if (abs(a->even_cprtime - a->odd_cprtime) <= 10000) {
+            if (llabs(a->even_cprtime - a->odd_cprtime) <= 10000) {
                 decodeCPR(a);
             }
         } else if (mm->metype == 19) {
@@ -2478,9 +2458,10 @@ void backgroundTasks(void) {
 int main(int argc, char **argv) {
     int j;
 
-    /*SHORT CIRCUIT *** TEST */
+    // rca SHORT CIRCUIT *** TEST 
     testdb();
     exit(0);
+    // */
 
     /* Set sane defaults. */
     modesInitConfig();

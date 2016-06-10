@@ -1,5 +1,5 @@
-/* database.c -- Look up tail number and acft information from mode_s code 
- *
+/* database.c -- Look up tail number and acft information from mode_s code {{{1
+ * 
  * Copyright (c) 2016, Robert Altenburg <r at qrpc dot com>
  * All rights reserved.
  *
@@ -26,28 +26,61 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+ * 1}}}*/
 
+/* includes {{{1 */
 #include <sqlite3.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <sys/time.h>
 
 #include "database.h"
+#include "dump1090.h"
+/* 1}}} */
 
-/* testing and debugging */
+//From the SQLite manual:
+#define ERRCHECK {if (err!=NULL) {printf("%s\n",err);  return 0;}}
 
-int testdb(void) {
-    sqlite3 *db;
-    int rc = sqlite3_open("icao/aircraft.db", &db);
+sqlite3 *db=NULL;
 
-    if (rc != SQLITE_OK) {
-        /* frintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db)); */
-        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        return 1;
-    }
+int interactiveEnhanceAircraft(struct aircraft*);
+static int db_open(char *);
+int db_query(char *);
+int db_callback(void *, int , char **, char **);
 
-    printf("Ok... database open.\n");
-    sqlite3_close(db);
+static int db_open(char *filename){
+    sqlite3_open(filename,&db);
+    if (!db)
+        printf("Not sure why, but the database didn't open.\n");
     return 0;
 }
+
+int db_callback(void *a_param, int argc, char **argv, char **column){
+        for (int i=0; i< argc; i++)
+                    printf("%s,\t", argv[i]);
+            printf("\n");
+                return 0;
+}
+
+int db_query(char *query){
+  char *err = NULL;
+    if (db==NULL) 
+        db_open(NULL);
+    sqlite3_exec(db, query, db_callback, NULL, &err); 
+    ERRCHECK
+        return(0);
+}
+
+
+/* testing and debugging {{{1*/
+
+int testdb(void) {
+    db_open("icao/icao.db");
+    db_query("select * from aircraft;");
+    return 0;
+}
+
+// 1}}}
+
 
