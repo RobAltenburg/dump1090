@@ -46,6 +46,9 @@ int interactiveEnhanceAircraft(struct aircraft *acft) {
     int rc;
     sqlite3 *db=NULL;
     sqlite3_stmt *res=NULL;
+    char hexaddr[7];    // printable ICAO address
+
+    snprintf(hexaddr,sizeof(hexaddr),"%06x",(int)acft->addr);
 
     sqlite3_open("icao/icao.db", &db);
     rc = sqlite3_prepare_v2(db, "select tail_num, model from aircraft where mode_s = ?", -1, &res, 0);     
@@ -53,7 +56,7 @@ int interactiveEnhanceAircraft(struct aircraft *acft) {
     if (rc != SQLITE_OK) 
         fprintf(stderr, "SQL error (prepare) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
 
-    rc = sqlite3_bind_text(res, 1, acft->hexaddr, -1, 0);
+    rc = sqlite3_bind_text(res, 1, hexaddr, -1, 0);
     if (rc != SQLITE_OK) 
         fprintf(stderr, "SQL error (bind) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
 

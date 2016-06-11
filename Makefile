@@ -1,15 +1,29 @@
-CFLAGS?=-O2 -g -Wall -W $(shell pkg-config --cflags librtlsdr)
-LDLIBS+=$(shell pkg-config --libs librtlsdr) -L/usr/local/lib -lpthread -lm -lsqlite3
-CC?=clang
+#
+# When building a package or installing otherwise in the system, make
+# sure that the variable PREFIX is defined, e.g. make PREFIX=/usr/local
+#
 PROGNAME=dump1090
 
-all: dump1090
+ifdef PREFIX
+BINDIR=$(PREFIX)/bin
+SHAREDIR=$(PREFIX)/share/$(PROGNAME)
+EXTRACFLAGS=-DHTMLPATH=\"$(SHAREDIR)\"
+endif
+
+CFLAGS=-O2 -g -Wall -W `pkg-config --cflags librtlsdr`
+LIBS=`pkg-config --libs librtlsdr` -L /usr/local/lib -lpthread -lm -lsqlite3
+CC=clang
+
+all: dump1090 view1090
 
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(EXTRACFLAGS) -c $<
 
-dump1090: dump1090.o anet.o database.o
-	$(CC) -g -o dump1090 dump1090.o anet.o database.o $(LDFLAGS) $(LDLIBS)
+dump1090: dump1090.o anet.o interactive.o mode_ac.o mode_s.o net_io.o database.o
+	$(CC) -g -o dump1090 dump1090.o anet.o interactive.o mode_ac.o mode_s.o net_io.o database.o $(LIBS) $(LDFLAGS)
+
+view1090: view1090.o anet.o interactive.o mode_ac.o mode_s.o net_io.o database.o
+	$(CC) -g -o view1090 view1090.o anet.o interactive.o mode_ac.o mode_s.o net_io.o database.o $(LIBS) $(LDFLAGS)
 
 clean:
-	rm -f *.o dump1090
+	rm -f *.o dump1090 view1090
