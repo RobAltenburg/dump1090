@@ -45,6 +45,8 @@
 #include <sys/select.h>
 #include "rtl-sdr.h"
 #include "anet.h"
+#include "database.h"
+#include "dump1090.h"
 
 #define MODES_DEFAULT_RATE         2000000
 #define MODES_DEFAULT_FREQ         1090000000
@@ -99,27 +101,6 @@ struct client {
     int service;    /* TCP port the client is connected to. */
     char buf[MODES_CLIENT_BUF_SIZE+1];    /* Read buffer. */
     int buflen;                         /* Amount of data on buffer. */
-};
-
-/* Structure used to describe an aircraft in iteractive mode. */
-struct aircraft {
-    uint32_t addr;      /* ICAO address */
-    char hexaddr[7];    /* Printable ICAO address */
-    char flight[9];     /* Flight number */
-    int altitude;       /* Altitude */
-    int speed;          /* Velocity computed from EW and NS components. */
-    int track;          /* Angle of flight. */
-    time_t seen;        /* Time at which the last packet was received. */
-    long messages;      /* Number of Mode S messages received. */
-    /* Encoded latitude and longitude as extracted by odd and even
-     * CPR encoded messages. */
-    int odd_cprlat;
-    int odd_cprlon;
-    int even_cprlat;
-    int even_cprlon;
-    double lat, lon;    /* Coordinated obtained from CPR encoded data. */
-    long long odd_cprtime, even_cprtime;
-    struct aircraft *next; /* Next aircraft in our linked list. */
 };
 
 /* Program global state. */
@@ -1583,6 +1564,10 @@ struct aircraft *interactiveCreateAircraft(uint32_t addr) {
     a->seen = time(NULL);
     a->messages = 0;
     a->next = NULL;
+    
+    /* rca - call database to add tail number and type */
+    interactiveEnhanceAircraft(a);
+
     return a;
 }
 
@@ -1781,7 +1766,7 @@ struct aircraft *interactiveReceiveData(struct modesMessage *mm) {
             }
             /* If the two data is less than 10 seconds apart, compute
              * the position. */
-            if (abs(a->even_cprtime - a->odd_cprtime) <= 10000) {
+            if (llabs(a->even_cprtime - a->odd_cprtime) <= 10000) {
                 decodeCPR(a);
             }
         } else if (mm->metype == 19) {
@@ -1806,9 +1791,16 @@ void interactiveShowData(void) {
     progress[3] = '\0';
 
     printf("\x1b[H\x1b[2J");    /* Clear the screen */
+ 
+ /* rca -- update display   
     printf(
 "Hex    Flight   Altitude  Speed   Lat       Lon       Track  Messages Seen %s\n"
 "--------------------------------------------------------------------------------\n",
+        progress);
+*/
+    printf(
+"Hex    Tail     Type       Flight   Altitude  Speed   Lat       Lon       Track  Messages Seen %s\n"
+"---------------------------------------------------------------------------------------------------\n",
         progress);
 
     while(a && count < Modes.interactive_rows) {
@@ -1820,8 +1812,8 @@ void interactiveShowData(void) {
             speed *= 1.852;
         }
 
-        printf("%-6s %-8s %-9d %-7d %-7.03f   %-7.03f   %-3d   %-9ld %d sec\n",
-            a->hexaddr, a->flight, altitude, speed,
+        printf("%-6s %-8s %-9s %-9s %-9d %-7d %-7.03f   %-7.03f   %-3d   %-9ld %d sec\n",
+            a->hexaddr, a->tailnum, a->type, a->flight, altitude, speed,
             a->lat, a->lon, a->track, a->messages,
             (int)(now - a->seen));
         a = a->next;
@@ -2154,9 +2146,9 @@ char *aircraftsToJson(int *len) {
             l = snprintf(p,buflen,
                 "{\"hex\":\"%s\", \"flight\":\"%s\", \"lat\":%f, "
                 "\"lon\":%f, \"altitude\":%d, \"track\":%d, "
-                "\"speed\":%d},\n",
+                "\"speed\":%d, \"tailnum\":\"%s\", \"type\":\"%s\"},\n",
                 a->hexaddr, a->flight, a->lat, a->lon, a->altitude, a->track,
-                a->speed);
+                a->speed, a->tailnum, a->type);
             p += l; buflen -= l;
             /* Resize if needed. */
             if (buflen < 256) {
