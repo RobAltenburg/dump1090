@@ -1,6 +1,6 @@
 CFLAGS?=-O2 -g -Wall -W $(shell pkg-config --cflags librtlsdr)
 LDLIBS+=$(shell pkg-config --libs librtlsdr) -L/usr/local/lib -lpthread -lm -lsqlite3
-CC?=gcc
+CC?=clang
 PROGNAME=dump1090
 
 all: dump1090

@@ -1564,6 +1564,10 @@ struct aircraft *interactiveCreateAircraft(uint32_t addr) {
     a->seen = time(NULL);
     a->messages = 0;
     a->next = NULL;
+    
+    /* rca - call database to add tail number and type */
+    interactiveEnhanceAircraft(a);
+
     return a;
 }
 
@@ -1787,9 +1791,16 @@ void interactiveShowData(void) {
     progress[3] = '\0';
 
     printf("\x1b[H\x1b[2J");    /* Clear the screen */
+ 
+ /* rca -- update display   
     printf(
 "Hex    Flight   Altitude  Speed   Lat       Lon       Track  Messages Seen %s\n"
 "--------------------------------------------------------------------------------\n",
+        progress);
+*/
+    printf(
+"Hex    Tail     Type       Flight   Altitude  Speed   Lat       Lon       Track  Messages Seen %s\n"
+"---------------------------------------------------------------------------------------------------\n",
         progress);
 
     while(a && count < Modes.interactive_rows) {
@@ -1801,8 +1812,8 @@ void interactiveShowData(void) {
             speed *= 1.852;
         }
 
-        printf("%-6s %-8s %-9d %-7d %-7.03f   %-7.03f   %-3d   %-9ld %d sec\n",
-            a->hexaddr, a->flight, altitude, speed,
+        printf("%-6s %-8s %-9s %-9s %-9d %-7d %-7.03f   %-7.03f   %-3d   %-9ld %d sec\n",
+            a->hexaddr, a->tailnum, a->type, a->flight, altitude, speed,
             a->lat, a->lon, a->track, a->messages,
             (int)(now - a->seen));
         a = a->next;
@@ -2457,11 +2468,6 @@ void backgroundTasks(void) {
 
 int main(int argc, char **argv) {
     int j;
-
-    // rca SHORT CIRCUIT *** TEST 
-    testdb();
-    exit(0);
-    // */
 
     /* Set sane defaults. */
     modesInitConfig();

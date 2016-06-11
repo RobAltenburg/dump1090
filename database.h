@@ -3,6 +3,6 @@
 
 #include "dump1090.h"
 
-int testdb(void);
+int interactiveEnhanceAircraft(struct aircraft*);
 
 #endif

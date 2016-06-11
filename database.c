@@ -40,81 +40,35 @@
 #include "dump1090.h"
 /* 1}}} */
 
-//From the SQLite manual:
-#define ERRCHECK {if (err!=NULL) {printf("%s\n",err);  return 0;}}
-
-sqlite3 *db=NULL;
-
-int interactiveEnhanceAircraft(struct aircraft*);
-static int db_open(char *);
-int db_query(char *);
-int db_callback(void *, int , char **, char **);
-
-static int db_open(char *filename){
-    sqlite3_open(filename,&db);
-    if (!db)
-        printf("Not sure why, but the database didn't open.\n");
-    return 0;
-}
-
-int db_callback(void *a_param, int argc, char **argv, char **column){
-        for (int i=0; i< argc; i++)
-                    printf("%s,\t", argv[i]);
-            printf("\n");
-                return 0;
-}
-
-int db_query(char *query){
-  char *err = NULL;
-    if (db==NULL) 
-        db_open(NULL);
-    sqlite3_exec(db, query, db_callback, NULL, &err); 
-    ERRCHECK
-        return(0);
-}
 
 int interactiveEnhanceAircraft(struct aircraft *acft) {
 
-    sqlite3_stmt *res;
     int rc;
-    char modeS[7] ="";
+    sqlite3 *db=NULL;
+    sqlite3_stmt *res=NULL;
 
-    // convert mode_s hex code to a string 
-    snprintf(modeS, 7, "0x%p", (void *) &acft->addr);
+    sqlite3_open("icao/icao.db", &db);
+    rc = sqlite3_prepare_v2(db, "select tail_num, model from aircraft where mode_s = ?", -1, &res, 0);     
+    
+    if (rc != SQLITE_OK) 
+        fprintf(stderr, "SQL error (prepare) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
 
-    rc = sqlite3_prepare_v2(db, "select tail_num, model from aircraft where mode_s = 'adf7c5';", -1, &res, 0);
-
-    if (rc != SQLITE_OK) {
-        
-        fprintf(stderr, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
-        
-        return 1;
-    }
+    rc = sqlite3_bind_text(res, 1, acft->hexaddr, -1, 0);
+    if (rc != SQLITE_OK) 
+        fprintf(stderr, "SQL error (bind) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
 
     rc = sqlite3_step(res);
-    
+        
     if (rc == SQLITE_ROW) {
-        strcpy(acft->tailnum, (char *) sqlite3_column_text(res, 0));
-        strcpy(acft->type, (char *) sqlite3_column_text(res, 1));
-    }
+        if (sqlite3_column_text(res,0) != NULL)
+            strcpy(acft->tailnum, (char *) sqlite3_column_text(res, 0));
+        if (sqlite3_column_text(res,1) != NULL)
+            strcpy(acft->type, (char *) sqlite3_column_text(res, 1));
+        }
     
     sqlite3_finalize(res);
     sqlite3_close(db);
     
     return 0;
 }
-
-
-
-/* testing and debugging {{{1*/
-
-int testdb(void) {
-    db_open("icao/icao.db");
-    db_query("select tail_num, model from aircraft where mode_s = 'adf7c5';");
-    return 0;
-}
-
-// 1}}}
-
 

@@ -13,7 +13,7 @@ struct aircraft {
     long messages;      /* Number of Mode S messages received. */
     /* rca data looked up based on icao address
      * TODO: guarantee char sizes are correct */
-    char tailnum[9];    /* Tail Number */
+    char tailnum[15];    /* Tail Number */
     char mfg[25];       /* Manufacturer */
     char type[25];      /* Model / Type */
     /* rca end */
