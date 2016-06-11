@@ -87,6 +87,8 @@
 
         if (!p) return;
         var html = 'ICAO: '+p.hex+'<br>';
+        html += 'Tail Number: '+p.tailnum+'<br>';
+        html += 'Type: '+p.type+'<br>';
         if (p.flight.length) {
             html += '<b>'+p.flight+'</b><br>';
         }
@@ -118,6 +120,8 @@
                     myplane.lon = plane.lon;
                     myplane.track = plane.track;
                     myplane.flight = plane.flight;
+                    myplane.tailnum = plane.tailnum;
+                    myplane.type = plane.type;
                     if (myplane.hex == Selected)
                         refreshSelectedInfo();
                 } else {
