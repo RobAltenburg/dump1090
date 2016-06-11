@@ -15,7 +15,7 @@ struct aircraft {
      * TODO: guarantee char sizes are correct */
     char tailnum[9];    /* Tail Number */
     char mfg[25];       /* Manufacturer */
-    char type[10];      /* Model / Type */
+    char type[25];      /* Model / Type */
     /* rca end */
     /* Encoded latitude and longitude as extracted by odd and even
      * CPR encoded messages. */

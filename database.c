@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include "database.h"
@@ -72,12 +73,45 @@ int db_query(char *query){
         return(0);
 }
 
+int interactiveEnhanceAircraft(struct aircraft *acft) {
+
+    sqlite3_stmt *res;
+    int rc;
+    char modeS[7] ="";
+
+    // convert mode_s hex code to a string 
+    snprintf(modeS, 7, "0x%p", (void *) &acft->addr);
+
+    rc = sqlite3_prepare_v2(db, "select tail_num, model from aircraft where mode_s = 'adf7c5';", -1, &res, 0);
+
+    if (rc != SQLITE_OK) {
+        
+        fprintf(stderr, "Failed to fetch data: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        
+        return 1;
+    }
+
+    rc = sqlite3_step(res);
+    
+    if (rc == SQLITE_ROW) {
+        strcpy(acft->tailnum, (char *) sqlite3_column_text(res, 0));
+        strcpy(acft->type, (char *) sqlite3_column_text(res, 1));
+    }
+    
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+    
+    return 0;
+}
+
+
 
 /* testing and debugging {{{1*/
 
 int testdb(void) {
     db_open("icao/icao.db");
-    db_query("select * from aircraft;");
+    db_query("select tail_num, model from aircraft where mode_s = 'adf7c5';");
     return 0;
 }
 
