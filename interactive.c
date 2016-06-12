@@ -440,13 +440,13 @@ void interactiveShowData(void) {
 
     if (Modes.interactive_rtl1090 == 0) {
         printf (
-"Hex     Mode    Tail   Type   Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   Sig  Msgs   Ti%c\n", progress);
+"Hex     Mode    Tail    Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   Sig  Msgs   Ti  Type   %c\n", progress);
     } else {
         printf (
 "Hex    Flight   Alt      V/S GS  TT  SSR  G*456^ Msgs    Seen %c\n", progress);
     }
     printf(
-"-------------------------------------------------------------------------------\n");
+"----------------------------------------------------------------------------------------------------\n");
 
     while(a && (count < Modes.interactive_rows)) {
 
@@ -488,8 +488,8 @@ void interactiveShowData(void) {
                     if (a->bFlags & MODES_ACFLAGS_ALTITUDE_VALID) {
                         snprintf(strFl,6,"F%03d",(altitude/100));
                     }
-                    printf("%06x %-8s %-9s %-8s %-4s         %-3s %-3s %4s        %-6d  %-2d\n", 
-                    a->addr, a->tailnum, a->type, a->flight, strFl, strGs, strTt, strSquawk, msgs, (int)(now - a->seen));
+                    printf("%06x %-8s %-4s         %-3s %-3s %4s        %-6d  %-2d\n", 
+                    a->addr, a->flight, strFl, strGs, strTt, strSquawk, msgs, (int)(now - a->seen));
 
                 } else {                         // Dump1090 display mode
                     char strMode[5]               = "    ";
@@ -518,9 +518,9 @@ void interactiveShowData(void) {
                         snprintf(strFl, 6, "%5d", altitude);
                     }
 
-                    printf("%06X  %-4s %-8s %-9s %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d\n",
-                    a->addr, strMode, a->tailnum, a->type, strSquawk, a->flight, strFl, strGs, strTt,
-                    strLat, strLon, signalAverage, msgs, (int)(now - a->seen));
+                    printf("%06X  %-4s   %-8s %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d  %-9s\n",
+                    a->addr, strMode, a->tailnum, strSquawk, a->flight, strFl, strGs, strTt,
+                    strLat, strLon, signalAverage, msgs, (int)(now - a->seen), a->type);
                 }
                 count++;
             }

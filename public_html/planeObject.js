@@ -14,6 +14,8 @@ var planeObject = {
 	flight		: null,
 	squawk		: null,
 	icao		: null,
+        tail_number     : null,
+        type            : null,
 	is_selected	: false,	
 
 	// Data packet numbers
@@ -148,6 +150,8 @@ var planeObject = {
 			this.icao	= data.hex;
 			this.messages	= data.messages;
 			this.seen	= data.seen;
+                        this.tail_number = data.tailnum;
+                        this.type       = data.type;
 
 			// If no packet in over 58 seconds, consider the plane reapable
 			// This way we can hold it, but not show it just in case the plane comes back
@@ -232,9 +236,9 @@ var planeObject = {
 
 			// Setting the marker title
 			if (this.flight.length == 0) {
-				this.marker.setTitle(this.hex);
+				this.marker.setTitle(this.tail_number+' ('+this.icao+')');
 			} else {
-				this.marker.setTitle(this.flight+' ('+this.icao+')');
+				this.marker.setTitle(this.flight+' '+this.tail_number+' ('+this.icao+')');
 			}
 			return this.marker;
 		},
