@@ -1,6 +1,6 @@
 // dump1090, a Mode S messages decoder for RTLSDR devices.
 //
-// Copyright (C) 2012 by Salvatore Sanfilippo <antirez@gmail.com>
+// {{{1 Copyright (C) 2012 by Salvatore Sanfilippo <antirez@gmail.com>
 //
 // All rights reserved.
 //
@@ -26,7 +26,7 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
+// 1}}}
 
 #include "dump1090.h"
 #include "database.h"
@@ -43,6 +43,73 @@ static uint64_t mstime(void) {
     mst += tv.tv_usec/1000;
     return mst;
 }
+
+//
+// ============================= Logging function ==========================
+//
+void logWriteData(char *filename, struct aircraft *a) {
+    time_t now = time(NULL);
+
+    // Format
+    // "Hex,Mode,Tail,Sqwk,Flight,Alt,Spd,Hdg,Lat,Long,Msgs,Time,Type
+
+    int altitude = a->altitude, speed = a->speed;
+    char strSquawk[5] = " ";
+    char strFl[6]     = " ";
+    char strTt[5]     = " ";
+    char strGs[5]     = " ";
+    char strMode[5]   = "    ";
+    char strLat[8]    = " ";
+    char strLon[9]    = " ";
+    int msgs  = a->messages;
+    int flags = a->modeACflags;
+
+
+
+    FILE *fp;
+                 
+    // Convert units to metric if --metric was specified
+    if (Modes.metric) {
+        altitude = (int) (altitude / 3.2828);
+        speed    = (int) (speed    * 1.852);
+        }
+
+    if (a->bFlags & MODES_ACFLAGS_SQUAWK_VALID) {
+        snprintf(strSquawk,5,"%04x", a->modeA);}
+
+    if (a->bFlags & MODES_ACFLAGS_SPEED_VALID) {
+        snprintf (strGs, 5,"%3d", speed);}
+
+    if (a->bFlags & MODES_ACFLAGS_HEADING_VALID) {
+        snprintf (strTt, 5,"%03d", a->track);}
+
+    if ((flags & MODEAC_MSG_FLAG) == 0) {
+        strMode[0] = 'S';
+    } else if (flags & MODEAC_MSG_MODEA_ONLY) {
+        strMode[0] = 'A';
+    }
+    if (flags & MODEAC_MSG_MODEA_HIT) {strMode[2] = 'a';}
+    if (flags & MODEAC_MSG_MODEC_HIT) {strMode[3] = 'c';}
+
+    if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
+        snprintf(strLat, 8,"%7.03f", a->lat);
+        snprintf(strLon, 9,"%8.03f", a->lon);
+    }
+
+    if (a->bFlags & MODES_ACFLAGS_AOG) {
+        snprintf(strFl, 6," grnd");
+    } else if (a->bFlags & MODES_ACFLAGS_ALTITUDE_VALID) {
+        snprintf(strFl, 6, "%5d", altitude);
+    }
+
+    fp = fopen(filename, "a");
+    fprintf(fp, "%06X,%s,%s,%s,%s,%s,%s,%s,%s,%s,%d,%ld,%s\n",
+    a->addr, strMode, a->tailnum, strSquawk, a->flight, strFl, strGs, strTt,
+    strLat, strLon, msgs, (long) now, a->type);
+    fclose(fp);
+}
+
+ 
 //
 //=========================================================================
 //
@@ -531,7 +598,7 @@ void interactiveShowData(void) {
 //
 //=========================================================================
 //
-// When in interactive mode If we don't receive new nessages within
+// When in interactive mode If we don't receive new messages within
 // MODES_INTERACTIVE_DELETE_TTL seconds we remove the aircraft from the list.
 //
 void interactiveRemoveStaleAircrafts(void) {
@@ -547,6 +614,8 @@ void interactiveRemoveStaleAircrafts(void) {
 
         while(a) {
             if ((now - a->seen) > Modes.interactive_delete_ttl) {
+                // rca: logging
+                logWriteData ("test_log.csv", a);
                 // Remove the element from the linked list, with care
                 // if we are removing the first element
                 if (!prev) {

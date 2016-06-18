@@ -250,7 +250,10 @@ function refreshSelected() {
     }
 	
 	// Flight header line including squawk if needed
-	if (selected && selected.flight != "" && selected.tail_number != "") {
+	if (selected && selected.flight != "") {
+	    html += '<tr><td colspan="' + columns + '" id="selectedinfotitle"><b>' +
+	        selected.flight + '</b>';
+        } else if (selected && selected.tail_number != "") {
 	    html += '<tr><td colspan="' + columns + '" id="selectedinfotitle"><b>' +
 	        selected.tail_number + '</b>';
         } else if (selected && selected.flight == "") {
