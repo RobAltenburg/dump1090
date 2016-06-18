@@ -51,20 +51,15 @@ void logWriteData(char *filename, struct aircraft *a) {
     time_t now = time(NULL);
 
     // Format
-    // "Hex,Mode,Tail,Sqwk,Flight,Alt,Spd,Hdg,Lat,Long,Msgs,Time,Type
+    // "Hex,Tail,Sqwk,Flight,Alt,Spd,Hdg,Lat,Long,Time,Type
 
     int altitude = a->altitude, speed = a->speed;
     char strSquawk[5] = " ";
     char strFl[6]     = " ";
     char strTt[5]     = " ";
     char strGs[5]     = " ";
-    char strMode[5]   = "    ";
     char strLat[8]    = " ";
     char strLon[9]    = " ";
-    int msgs  = a->messages;
-    int flags = a->modeACflags;
-
-
 
     FILE *fp;
                  
@@ -83,14 +78,6 @@ void logWriteData(char *filename, struct aircraft *a) {
     if (a->bFlags & MODES_ACFLAGS_HEADING_VALID) {
         snprintf (strTt, 5,"%03d", a->track);}
 
-    if ((flags & MODEAC_MSG_FLAG) == 0) {
-        strMode[0] = 'S';
-    } else if (flags & MODEAC_MSG_MODEA_ONLY) {
-        strMode[0] = 'A';
-    }
-    if (flags & MODEAC_MSG_MODEA_HIT) {strMode[2] = 'a';}
-    if (flags & MODEAC_MSG_MODEC_HIT) {strMode[3] = 'c';}
-
     if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
         snprintf(strLat, 8,"%7.03f", a->lat);
         snprintf(strLon, 9,"%8.03f", a->lon);
@@ -103,9 +90,9 @@ void logWriteData(char *filename, struct aircraft *a) {
     }
 
     fp = fopen(filename, "a");
-    fprintf(fp, "%06X,%s,%s,%s,%s,%s,%s,%s,%s,%s,%d,%ld,%s\n",
-    a->addr, strMode, a->tailnum, strSquawk, a->flight, strFl, strGs, strTt,
-    strLat, strLon, msgs, (long) now, a->type);
+    fprintf(fp, "%06X,%s,%s,%s,%s,%s,%s,%s,%s,%ld,%s\n",
+    a->addr, a->tailnum, strSquawk, a->flight, strFl, strGs, strTt,
+    strLat, strLon, (long) now, a->type);
     fclose(fp);
 }
 
@@ -615,7 +602,8 @@ void interactiveRemoveStaleAircrafts(void) {
         while(a) {
             if ((now - a->seen) > Modes.interactive_delete_ttl) {
                 // rca: logging
-                logWriteData ("test_log.csv", a);
+                if (Modes.log_enabled)
+                    logWriteData (Modes.log_filename, a);
                 // Remove the element from the linked list, with care
                 // if we are removing the first element
                 if (!prev) {

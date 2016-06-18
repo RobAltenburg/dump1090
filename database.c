@@ -64,9 +64,12 @@ int interactiveEnhanceAircraft(struct aircraft *acft) {
         
     if (rc == SQLITE_ROW) {
         if (sqlite3_column_text(res,0) != NULL)
-            strcpy(acft->tailnum, (char *) sqlite3_column_text(res, 0));
+            strncpy(acft->tailnum, (char *) sqlite3_column_text(res, 0), MAX_TAIL_STRING -1);
+            acft->tailnum[MAX_TAIL_STRING -1] = '\0';
         if (sqlite3_column_text(res,1) != NULL)
-            strcpy(acft->type, (char *) sqlite3_column_text(res, 1));
+            strncpy(acft->type, (char *) sqlite3_column_text(res, 1), MAX_TYPE_STRING -1);
+            acft->type[MAX_TYPE_STRING -1] = '\0';
+
         }
     
     sqlite3_finalize(res);

@@ -182,6 +182,9 @@
 #define HTMLPATH   "./public_html"      // default path for gmap.html etc
 #endif
 
+#define MAX_TAIL_STRING 16
+#define MAX_TYPE_STRING 26
+
 #define MODES_NOTUSED(V) ((void) V)
 
 //======================== structure declarations =========================
@@ -211,9 +214,9 @@ struct aircraft {
     long          messages;       // Number of Mode S messages received
     /* rca data looked up based on icao address
      * TODO: guarantee char sizes are correct */
-    char tailnum[15];    /* Tail Number */
+    char tailnum[MAX_TAIL_STRING];    /* Tail Number */
     char mfg[25];       /* Manufacturer */
-    char type[25];      /* Model / Type */
+    char type[MAX_TYPE_STRING];      /* Model / Type */
     /* rca end */
      int           modeA;          // Squawk
     int           modeC;          // Altitude
@@ -376,6 +379,10 @@ struct {                             // Internal state
 
     unsigned int stat_blocks_processed;
     unsigned int stat_blocks_dropped;
+
+    // rca: logging
+    unsigned int log_enabled;
+    char *log_filename;   //  --log option
 } Modes;
 
 // The struct we use to store information about a decoded message.

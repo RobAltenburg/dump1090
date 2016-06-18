@@ -779,6 +779,9 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--interactive-rtl1090")) {
             Modes.interactive = 1;
             Modes.interactive_rtl1090 = 1;
+        } else if (!strcmp(argv[j],"--log")) {
+            Modes.log_enabled = 1;
+            Modes.log_filename = strdup(argv[++j]);
         } else {
             fprintf(stderr,
                 "Unknown or not enough arguments for option '%s'.\n\n",
