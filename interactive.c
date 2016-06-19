@@ -30,6 +30,7 @@
 
 #include "dump1090.h"
 #include "database.h"
+#include <math.h>
 
 //
 // ============================= Utility functions ==========================
@@ -42,6 +43,18 @@ static uint64_t mstime(void) {
     mst = ((uint64_t)tv.tv_sec)*1000;
     mst += tv.tv_usec/1000;
     return mst;
+}
+
+//
+// function to calculate the nautical miles between two points using
+// the spherical law of cosines.
+//
+double nm_between_points (double lat1, double lon1, double lat2, double lon2) ; 
+
+double nm_between_points (double lat1, double lon1, double lat2, double lon2) {
+    return acos(sin(lat1 * 0.0174533) * sin(lat2 * 0.0174533) +
+            cos(lat1 * 0.0174533) * cos(lat2 * 0.0174533) *
+            cos((lon2 - lon1) * 0.0174533)) * 3440.065;
 }
 
 //
@@ -494,13 +507,13 @@ void interactiveShowData(void) {
 
     if (Modes.interactive_rtl1090 == 0) {
         printf (
-"Hex     Mode    Tail    Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   Sig  Msgs   Ti  Type   %c\n", progress);
+"Hex     Mode Tail    Sqwk  Flight    Alt    Spd  Hdg  Lat      Long   Dist  Sig  Msgs   Ti  Type   %c\n", progress);
     } else {
         printf (
 "Hex    Flight   Alt      V/S GS  TT  SSR  G*456^ Msgs    Seen %c\n", progress);
     }
     printf(
-"----------------------------------------------------------------------------------------------------\n");
+"--------------------------------------------------------------------------------------------------------\n");
 
     while(a && (count < Modes.interactive_rows)) {
 
@@ -549,6 +562,7 @@ void interactiveShowData(void) {
                     char strMode[5]               = "    ";
                     char strLat[8]                = " ";
                     char strLon[9]                = " ";
+                    char strDist[9]                = " ";
                     unsigned char * pSig       = a->signalLevel;
                     unsigned int signalAverage = (pSig[0] + pSig[1] + pSig[2] + pSig[3] + 
                                                   pSig[4] + pSig[5] + pSig[6] + pSig[7] + 3) >> 3; 
@@ -564,6 +578,9 @@ void interactiveShowData(void) {
                     if (a->bFlags & MODES_ACFLAGS_LATLON_VALID) {
                         snprintf(strLat, 8,"%7.03f", a->lat);
                         snprintf(strLon, 9,"%8.03f", a->lon);
+                        //rca
+                        snprintf(strDist, 9,"%5.1f", 
+                            nm_between_points(Modes.fUserLat, Modes.fUserLon, a->lat, a->lon));
                     }
 
                     if (a->bFlags & MODES_ACFLAGS_AOG) {
@@ -572,9 +589,9 @@ void interactiveShowData(void) {
                         snprintf(strFl, 6, "%5d", altitude);
                     }
 
-                    printf("%06X  %-4s   %-8s %-4s  %-8s %5s  %3s  %3s  %7s %8s  %3d %5d   %2d  %-9s\n",
+                    printf("%06X  %-4s %-8s %-4s  %-8s %5s  %3s  %3s %7s %8s %5s %3d %5d   %2d  %-9s\n",
                     a->addr, strMode, a->tailnum, strSquawk, a->flight, strFl, strGs, strTt,
-                    strLat, strLon, signalAverage, msgs, (int)(now - a->seen), a->type);
+                    strLat, strLon, strDist, signalAverage, msgs, (int)(now - a->seen), a->type);
                 }
                 count++;
             }
