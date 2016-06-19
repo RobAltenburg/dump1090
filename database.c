@@ -48,32 +48,35 @@ int interactiveEnhanceAircraft(struct aircraft *acft) {
     sqlite3_stmt *res=NULL;
     char hexaddr[7];    // printable ICAO address
 
-    snprintf(hexaddr,sizeof(hexaddr),"%06x",(int)acft->addr);
+    if (Modes.db_enabled) {
 
-    sqlite3_open("icao/icao.db", &db);
-    rc = sqlite3_prepare_v2(db, "select tail_num, model from aircraft where mode_s = ?", -1, &res, 0);     
-    
-    if (rc != SQLITE_OK) 
-        fprintf(stderr, "SQL error (prepare) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
+        snprintf(hexaddr,sizeof(hexaddr),"%06x",(int)acft->addr);
 
-    rc = sqlite3_bind_text(res, 1, hexaddr, -1, 0);
-    if (rc != SQLITE_OK) 
-        fprintf(stderr, "SQL error (bind) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
-
-    rc = sqlite3_step(res);
+        sqlite3_open(Modes.db_filename, &db);
+        rc = sqlite3_prepare_v2(db, "select tail_num, model from aircraft where mode_s = ?", -1, &res, 0);     
         
-    if (rc == SQLITE_ROW) {
-        if (sqlite3_column_text(res,0) != NULL)
-            strncpy(acft->tailnum, (char *) sqlite3_column_text(res, 0), MAX_TAIL_STRING -1);
-            acft->tailnum[MAX_TAIL_STRING -1] = '\0';
-        if (sqlite3_column_text(res,1) != NULL)
-            strncpy(acft->type, (char *) sqlite3_column_text(res, 1), MAX_TYPE_STRING -1);
-            acft->type[MAX_TYPE_STRING -1] = '\0';
+        if (rc != SQLITE_OK) 
+            fprintf(stderr, "SQL error (prepare) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
 
-        }
-    
-    sqlite3_finalize(res);
-    sqlite3_close(db);
+        rc = sqlite3_bind_text(res, 1, hexaddr, -1, 0);
+        if (rc != SQLITE_OK) 
+            fprintf(stderr, "SQL error (bind) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
+
+        rc = sqlite3_step(res);
+            
+        if (rc == SQLITE_ROW) {
+            if (sqlite3_column_text(res,0) != NULL)
+                strncpy(acft->tailnum, (char *) sqlite3_column_text(res, 0), MAX_TAIL_STRING -1);
+                acft->tailnum[MAX_TAIL_STRING -1] = '\0';
+            if (sqlite3_column_text(res,1) != NULL)
+                strncpy(acft->type, (char *) sqlite3_column_text(res, 1), MAX_TYPE_STRING -1);
+                acft->type[MAX_TYPE_STRING -1] = '\0';
+
+            }
+        
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+    }
     
     return 0;
 }

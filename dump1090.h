@@ -182,6 +182,7 @@
 #define HTMLPATH   "./public_html"      // default path for gmap.html etc
 #endif
 
+// database lookup
 #define MAX_TAIL_STRING 16
 #define MAX_TYPE_STRING 26
 
@@ -383,6 +384,11 @@ struct {                             // Internal state
     // rca: logging
     unsigned int log_enabled;
     char *log_filename;   //  --log option
+
+    // database
+    unsigned int db_enabled;
+    char *db_filename;
+
 } Modes;
 
 // The struct we use to store information about a decoded message.
