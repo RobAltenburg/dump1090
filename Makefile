@@ -12,7 +12,7 @@ endif
 
 CFLAGS=-O2 -g -Wall -W `pkg-config --cflags librtlsdr`
 LIBS=`pkg-config --libs librtlsdr` -L /usr/local/lib -lpthread -lm -lsqlite3
-CC=clang
+CC=gcc
 
 all: dump1090 view1090
 
