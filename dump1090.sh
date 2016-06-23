@@ -12,8 +12,8 @@
 ### END INIT INFO
 ## Fill in name of program here.
 PROG="dump1090"
-PROG_PATH="/home/pi/dump1090"
-PROG_ARGS="--quiet --net --net-ro-size 500 --net-ro-rate 5 --net-buffer 5"
+PROG_PATH="/home/pi/Projects/dump1090"
+PROG_ARGS="--interactive --net --net-ro-size 500 --net-ro-rate 5 --net-buffer 5 --log /var/dumplog.csv --lat 40.2187 --lon -76.870 --db icao/icao.db"
 PIDFILE="/var/run/dump1090.pid"
 
 start() {
