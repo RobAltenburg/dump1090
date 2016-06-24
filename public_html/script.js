@@ -431,7 +431,7 @@ function refreshTableInfo() {
 	html += '<td onclick="setASC_DESC(\'9\');sortTable(\'tableinfo\',\'9\');" ' +
 	    'align="right">Msgs</td>';
 	html += '<td onclick="setASC_DESC(\'10\');sortTable(\'tableinfo\',\'10\');" ' +
-	    'align="right">Signal</td></thead><tbody>';
+	    'align="right">Sig</td>';
 	html += '<td onclick="setASC_DESC(\'11\');sortTable(\'tableinfo\',\'11\');" ' +
 	    'align="right">Seen</td></thead><tbody>';
 	for (var tablep in Planes) {
