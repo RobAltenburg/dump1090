@@ -321,7 +321,7 @@ function refreshSelected() {
 	    html += 'n/a';
 	}
 
-    html += '<td>Type: '
+    html += '</td><td>Type: '
         if (selected && selected.type){
             html += selected.type;
         } else {
@@ -431,6 +431,8 @@ function refreshTableInfo() {
 	html += '<td onclick="setASC_DESC(\'9\');sortTable(\'tableinfo\',\'9\');" ' +
 	    'align="right">Msgs</td>';
 	html += '<td onclick="setASC_DESC(\'10\');sortTable(\'tableinfo\',\'10\');" ' +
+	    'align="right">Signal</td></thead><tbody>';
+	html += '<td onclick="setASC_DESC(\'11\');sortTable(\'tableinfo\',\'11\');" ' +
 	    'align="right">Seen</td></thead><tbody>';
 	for (var tablep in Planes) {
 		var tableplane = Planes[tablep]
@@ -505,6 +507,7 @@ function refreshTableInfo() {
     	    html += '</td>';
 			html += '<td align="right">' + tableplane.type + '</td>';
 			html += '<td align="right">' + tableplane.messages + '</td>';
+			html += '<td align="right">' + tableplane.signal + '</td>';
 			html += '<td align="right">' + tableplane.seen + '</td>';
 			html += '</tr>';
 		}
