@@ -21,6 +21,7 @@ var planeObject = {
 	// Data packet numbers
 	messages	: null,
 	seen		: null,
+	signal		: null,
 
 	// Vaild...
 	vPosition	: false,
@@ -150,6 +151,7 @@ var planeObject = {
 			this.icao	= data.hex;
 			this.messages	= data.messages;
 			this.seen	= data.seen;
+			this.signal	= data.signal;
                         this.tail_number = data.tailnum;
                         this.type       = data.type;
 
