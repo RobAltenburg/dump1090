@@ -422,7 +422,7 @@ function refreshTableInfo() {
         // Add distance column header to table if site coordinates are provided
         if (SiteShow && (typeof SiteLat !==  'undefined' || typeof SiteLon !==  'undefined')) {
             html += '<td onclick="setASC_DESC(\'6\');sortTable(\'tableinfo\',\'6\');" ' +
-                'align="right">Distance</td>';
+                'align="right">Dist.</td>';
         }
 	html += '<td onclick="setASC_DESC(\'7\');sortTable(\'tableinfo\',\'7\');" ' +
 	    'align="right">Track</td>';
