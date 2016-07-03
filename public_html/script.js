@@ -6,6 +6,7 @@ var PlanesOnTable = 0;
 var PlanesToReap  = 0;
 var SelectedPlane = null;
 var SpecialSquawk = false;
+var circleColor = "#FF0000";
 
 var iSortCol=-1;
 var bSortASC=true;
@@ -656,11 +657,6 @@ function resetMap() {
 function drawCircle(marker, distance) {
     if (typeof distance === 'undefined') {
         return false;
-       
-    var circleColor = "#555555";
-    if (distance==25||distance==75||distance=125||distance=175)circleColor="#0000FF";
-    if (distance==50||distance==100||distance=150||distance=200)circleColor="#FF0000";
-
         if (!(!isNaN(parseFloat(distance)) && isFinite(distance)) || distance < 0) {
             return false;
         }
@@ -670,6 +666,12 @@ function drawCircle(marker, distance) {
     if (!Metric) {
         distance *= 1.852;
     }
+
+    if (circleColor=="#0000FF") {
+        circleColor="#FF0000";
+    } else {
+        circleColor="#0000FF";
+    }
     
     // Add circle overlay and bind to marker
     var circle = new google.maps.Circle({
@@ -678,7 +680,7 @@ function drawCircle(marker, distance) {
       fillOpacity: 0.0,
       strokeColor: circleColor,
       strokeWeight: 1,
-      strokeOpacity: 0.3
+      strokeOpacity: 0.7
     });
     circle.bindTo('center', marker, 'position');
 }
