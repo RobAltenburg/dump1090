@@ -656,7 +656,11 @@ function resetMap() {
 function drawCircle(marker, distance) {
     if (typeof distance === 'undefined') {
         return false;
-        
+       
+    var circleColor = "#555555";
+    if (distance==25||distance==75||distance=125||distance=175)circleColor="#0000FF";
+    if (distance==50||distance==100||distance=150||distance=200)circleColor="#FF0000";
+
         if (!(!isNaN(parseFloat(distance)) && isFinite(distance)) || distance < 0) {
             return false;
         }
@@ -672,6 +676,7 @@ function drawCircle(marker, distance) {
       map: GoogleMap,
       radius: distance, // In meters
       fillOpacity: 0.0,
+      strokeColor: circleColor,
       strokeWeight: 1,
       strokeOpacity: 0.3
     });
