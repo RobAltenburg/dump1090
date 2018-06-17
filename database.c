@@ -61,6 +61,7 @@ int interactiveEnhanceAircraft(struct aircraft *acft) {
         rc = sqlite3_bind_text(res, 1, hexaddr, -1, 0);
         if (rc != SQLITE_OK) 
             fprintf(stderr, "SQL error (bind) on line:%d msg:%s \n",__LINE__, sqlite3_errmsg(db));
+            //fprintf(stderr, "db: %s \n",Modes.db_filename);
 
         rc = sqlite3_step(res);
             
